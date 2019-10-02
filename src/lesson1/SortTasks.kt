@@ -2,6 +2,9 @@
 
 package lesson1
 
+import java.io.File
+import java.lang.IllegalArgumentException
+
 /**
  * Сортировка времён
  *
@@ -33,7 +36,45 @@ package lesson1
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortTimes(inputName: String, outputName: String) {
-    TODO()
+    fun timeStrToSeconds(str: String, types: String): Int {
+        val parts = str.split(":").toMutableList()
+        if (types == "AM") {
+            val first = parts[0].toInt()
+            if (first == 12)
+                parts[0] = "0"
+        }
+
+        var result = 0
+        for (part in parts) {
+            val number = part.toInt()
+            result = result * 60 + number
+            if (types == "PM") {
+                if (parts.first().toInt() != 12)
+                    result += 12 * 3600
+            }
+        }
+        return result
+    }
+    //example: 4210 to 01:10:10 and can sort by it.first
+    val listTimes: MutableList<Pair<Int, String>> = mutableListOf()
+
+    val times = File(inputName).readLines()
+    for (line in times) {
+        if (!Regex("""^\d\d:\d\d:\d\d (AM|PM)""").matches(line))
+            throw IllegalArgumentException(line)
+
+        val text = line.split(" ")
+        val timeToSecond = timeStrToSeconds(text[0], text[1])
+        listTimes.add(timeToSecond to line)
+    }
+    listTimes.sortBy { it.first }
+    val sortTimes = listTimes.map { it.second }
+
+    File(outputName).bufferedWriter().use { out ->
+        repeat(sortTimes.size) {
+            out.write(sortTimes[it] + "\n")
+        }
+    }
 }
 
 /**
@@ -63,7 +104,19 @@ fun sortTimes(inputName: String, outputName: String) {
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+
+    val text = File(inputName).readLines()
+        .map { it.split(" - ")[1] to it.split(" - ")[0] }
+        .sortedWith(compareBy({ it.first.split(" ")[0] }, { it.first.split(" ")[1].toInt() }, { it.second }))
+        .groupBy { it.first }
+        .mapValues { (_, value) -> value.joinToString(", ") { it.second } }
+
+
+    File(outputName).bufferedWriter().use { out ->
+        repeat(text.size) {
+            out.write(text.keys.toList()[it] + " - " + text.values.toList()[it] + "\n")
+        }
+    }
 }
 
 /**
