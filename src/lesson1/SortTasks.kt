@@ -5,8 +5,6 @@ package lesson1
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
-import java.time.Period
-import kotlin.math.roundToInt
 
 /**
  * Сортировка времён
@@ -167,7 +165,7 @@ fun sortTemperatures(inputName: String, outputName: String) {
             else temperatures[number + 2730] = temperatures[number + 2730]!! + 1
         }
     } catch (e: IOException) {
-        println("Incorrect format");
+        println("Incorrect format")
     }
 
     try {
