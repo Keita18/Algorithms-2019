@@ -2,6 +2,9 @@
 
 package lesson2
 
+import kotlin.math.abs
+import kotlin.math.sqrt
+
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
  * Простая
@@ -80,7 +83,48 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
  * но приветствуется попытка решить её самостоятельно.
  */
 fun josephTask(menNumber: Int, choiceInterval: Int): Int {
-    TODO()
+    val list = mutableListOf<Int>()
+    if (choiceInterval == 1)
+        return menNumber
+    for (i in 1..menNumber) {
+        if (i % choiceInterval != 0) {
+            list.add(i)
+        }
+    }
+    var n = choiceInterval / menNumber
+    if (choiceInterval == menNumber) n = 0
+    var firstRemove = abs(n * menNumber - choiceInterval) - 1
+
+    while (list.size > 1) {
+        var secondRemove = firstRemove + choiceInterval - 1
+
+        if (secondRemove < list.size - 1) {
+            list.removeAt(secondRemove)
+            firstRemove = secondRemove
+            continue
+        }
+        if (secondRemove > list.size - 1) {
+            val j = secondRemove / list.size
+            secondRemove -= (j * list.size)
+            list.removeAt(secondRemove)
+            firstRemove = secondRemove
+            continue
+        }
+        if (secondRemove == list.size - 1) {
+            list.removeAt(secondRemove)
+            firstRemove = 0
+
+        }
+    }
+
+    return if (list.isNotEmpty()) list[0] else 0
+}
+
+fun main() {
+    var menNumber = 2
+    val y = josephTask(10, 2)
+    println(y)
+
 }
 
 /**
@@ -109,7 +153,21 @@ fun longestCommonSubstring(first: String, second: String): String {
  * Единица простым числом не считается.
  */
 fun calcPrimesNumber(limit: Int): Int {
-    TODO()
+    fun isPrime(n: Int): Boolean {
+        if (n < 2) return false
+        if (n == 2) return true
+        if (n % 2 == 0) return false
+        for (m in 3..sqrt(n.toDouble()).toInt() step 2) {
+            if (n % m == 0) return false
+        }
+        return true
+    }
+
+    var primeNum = 0
+    for (i in 1..limit)
+        if (isPrime(i))
+            primeNum++
+    return primeNum
 }
 
 /**

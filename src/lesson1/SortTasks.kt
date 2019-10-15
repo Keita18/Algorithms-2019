@@ -3,7 +3,9 @@
 package lesson1
 
 import java.io.File
-import java.lang.IllegalArgumentException
+import java.io.IOException
+import java.io.PrintWriter
+import kotlin.math.roundToInt
 
 /**
  * Сортировка времён
@@ -36,45 +38,23 @@ import java.lang.IllegalArgumentException
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortTimes(inputName: String, outputName: String) {
-    fun timeStrToSeconds(str: String, types: String): Int {
-        val parts = str.split(":").toMutableList()
-        if (types == "AM") {
-            val first = parts[0].toInt()
-            if (first == 12)
-                parts[0] = "0"
-        }
 
-        var result = 0
-        for (part in parts) {
-            val number = part.toInt()
-            result = result * 60 + number
-            if (types == "PM") {
-                if (parts.first().toInt() != 12)
-                    result += 12 * 3600
-            }
-        }
-        return result
-    }
-    //example: 4210 to 01:10:10 and can sort by it.first
-    val listTimes: MutableList<Pair<Int, String>> = mutableListOf()
-
-    val times = File(inputName).readLines()
-    for (line in times) {
-        if (!Regex("""^\d\d:\d\d:\d\d (AM|PM)""").matches(line))
-            throw IllegalArgumentException(line)
-
-        val text = line.split(" ")
-        val timeToSecond = timeStrToSeconds(text[0], text[1])
-        listTimes.add(timeToSecond to line)
-    }
-    listTimes.sortBy { it.first }
-    val sortTimes = listTimes.map { it.second }
-
-    File(outputName).bufferedWriter().use { out ->
-        repeat(sortTimes.size) {
-            out.write(sortTimes[it] + "\n")
-        }
-    }
+    val text = File(inputName).readLines().map {
+        require(Regex("""^\d\d:\d\d:\d\d (AM|PM)""").matches(it)) { it }
+        it.split(" ")[0] to it.split(" ")[1]
+    }.sortedWith(
+        compareBy(
+            { it.second },
+            {
+                val hours = it.first.split(":")[0].toInt()
+                hours + if (it.second == "AM" && hours == 12) -12
+                else if (it.second == "PM" && hours != 12) 12
+                else 0
+            },
+            { it.first.split(":")[1].toInt() },
+            { it.first.split(":")[2].toInt() })
+    ).joinToString("\n") { it.first + " " + it.second }
+    File(outputName).writeText(text)
 }
 
 /**
@@ -150,7 +130,33 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 121.3
  */
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val temperatures = arrayOfNulls<Int>(7731)
+    try {
+        File(inputName).readLines().forEach {
+            require(it.toDouble() <= 500 && it.toDouble() >= -273)
+            val number = (it.toDouble() * 10).toInt()
+
+            if (temperatures[number + 2730] == null)
+                temperatures[number + 2730] = 1
+            else temperatures[number + 2730] = temperatures[number + 2730]!! + 1
+        }
+    } catch (e: IOException) {
+        println("Error");
+    }
+
+    try {
+        PrintWriter(outputName).use { pw ->
+            for (i in 0..7730) {
+                if (temperatures[i] != null) {
+                    for (j in 1..temperatures[i]!!) {
+                        pw.println(((i - 2730) * 10.0).roundToInt() / 100.0)
+                    }
+                }
+            }
+        }
+    } catch (e: IOException) {
+        println("Error")
+    }
 }
 
 /**
@@ -201,6 +207,8 @@ fun sortSequence(inputName: String, outputName: String) {
  * Результат: second = [1 3 4 9 9 13 15 20 23 28]
  */
 fun <T : Comparable<T>> mergeArrays(first: Array<T>, second: Array<T?>) {
-    TODO()
+    for (i in first.indices) {
+        second[i] = first[i]
+    }
+    second.sort()
 }
-
