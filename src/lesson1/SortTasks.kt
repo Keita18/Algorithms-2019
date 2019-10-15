@@ -5,6 +5,7 @@ package lesson1
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
+import java.time.Period
 import kotlin.math.roundToInt
 
 /**
@@ -38,28 +39,58 @@ import kotlin.math.roundToInt
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortTimes(inputName: String, outputName: String) {
+    val amList = mutableListOf<String>()
+    val pmList = mutableListOf<String>()
 
-    val text = File(inputName).readLines().map {
+    File(inputName).readLines().map {
         require(Regex("""^\d\d:\d\d:\d\d (AM|PM)""").matches(it)) { it }
-        it.split(" ")[0] to it.split(" ")[1]
-    }.sortedWith(
-        compareBy(
-            { it.second },
-            {
-                val hours = it.first.split(":")[0].toInt()
-                hours + if (it.second == "AM" && hours == 12) -12
-                else if (it.second == "PM" && hours != 12) 12
-                else 0
-            },
-            { it.first.split(":")[1].toInt() },
-            { it.first.split(":")[2].toInt() })
-    ).joinToString("\n") { it.first + " " + it.second }
+        val period = it.split(" ")[1]
+        val time = it.split(" ")[0]
+
+        if (period == "AM")
+            amList.add(time)
+        else pmList.add(time)
+        it
+    }
+
+    fun comparator(m: MutableList<String>, period: String): MutableList<String> {
+        m.sortWith(
+            compareBy(
+                {
+                    val hours = it.split(":")[0].toInt()
+                    require(hours in 0..12)
+                    hours + if (period == "AM" && hours == 12) -12
+                    else if (period == "PM" && hours != 12) 12
+                    else 0
+
+                },
+                {
+                    require(it.split(":")[1].toInt() in 0..60)
+                    it.split(":")[1].toInt()
+                },
+                {
+                    require(it.split(":")[2].toInt() in 0..60)
+                    it.split(":")[2].toInt()
+                }
+            )
+        )
+        return m
+    }
+    comparator(amList, "AM")
+    comparator(pmList, "PM")
+    var text = amList.joinToString("\n") {
+        "$it AM"
+    }
+    text += "\n"
+    text += pmList.joinToString("\n") {
+        "$it PM"
+    }
     File(outputName).writeText(text)
+
 }
 
 /**
  * Сортировка адресов
- *
  * Средняя
  *
  * Во входном файле с именем inputName содержатся фамилии и имена жителей города с указанием улицы и номера дома,
@@ -90,13 +121,8 @@ fun sortAddresses(inputName: String, outputName: String) {
         .sortedWith(compareBy({ it.first.split(" ")[0] }, { it.first.split(" ")[1].toInt() }, { it.second }))
         .groupBy { it.first }
         .mapValues { (_, value) -> value.joinToString(", ") { it.second } }
-
-
-    File(outputName).bufferedWriter().use { out ->
-        repeat(text.size) {
-            out.write(text.keys.toList()[it] + " - " + text.values.toList()[it] + "\n")
-        }
-    }
+        .map { it.key + " - " + it.value }.joinToString("\n")
+    File(outputName).writeText(text)
 }
 
 /**
@@ -141,18 +167,15 @@ fun sortTemperatures(inputName: String, outputName: String) {
             else temperatures[number + 2730] = temperatures[number + 2730]!! + 1
         }
     } catch (e: IOException) {
-        println("Error");
+        println("Incorrect format");
     }
 
     try {
         PrintWriter(outputName).use { pw ->
-            for (i in 0..7730) {
-                if (temperatures[i] != null) {
-                    for (j in 1..temperatures[i]!!) {
-                        pw.println(((i - 2730) * 10.0).roundToInt() / 100.0)
-                    }
-                }
-            }
+            for (i in 0..7730)
+                if (temperatures[i] != null)
+                    for (j in 1..temperatures[i]!!)
+                        pw.println(((i - 2730)) / 10.0)
         }
     } catch (e: IOException) {
         println("Error")
