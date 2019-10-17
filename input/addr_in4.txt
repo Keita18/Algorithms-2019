@@ -1,0 +1,7 @@
+try {
+            assertThrows<Exception>("Incorrect format") {
+                sortAddresses("input/addr_in5.txt", "temp.txt")
+            }
+        } finally {
+            File("temp.txt").delete()
+        }

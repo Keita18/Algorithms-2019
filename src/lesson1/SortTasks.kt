@@ -36,7 +36,7 @@ import java.io.PrintWriter
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
-fun sortTimes(inputName: String, outputName: String) {
+fun sortTimes(inputName: String, outputName: String) { //сложность O(nlogn)
     val amList = mutableListOf<String>()
     val pmList = mutableListOf<String>()
 
@@ -51,7 +51,7 @@ fun sortTimes(inputName: String, outputName: String) {
         it
     }
 
-    fun comparator(m: MutableList<String>, period: String): MutableList<String> {
+    fun sort(m: MutableList<String>, period: String): MutableList<String> {
         m.sortWith(
             compareBy(
                 {
@@ -74,8 +74,8 @@ fun sortTimes(inputName: String, outputName: String) {
         )
         return m
     }
-    comparator(amList, "AM")
-    comparator(pmList, "PM")
+    sort(amList, "AM")
+    sort(pmList, "PM")
     var text = amList.joinToString("\n") {
         "$it AM"
     }
@@ -112,10 +112,15 @@ fun sortTimes(inputName: String, outputName: String) {
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
+//Time Complexity: O(nlogn)
+// Memory Complexity: O(1)
 fun sortAddresses(inputName: String, outputName: String) {
 
     val text = File(inputName).readLines()
-        .map { it.split(" - ")[1] to it.split(" - ")[0] }
+        .map {
+            require(Regex("""(\S+ \S+) - (\S+) (\d+)""").matches(it)) { it }
+            it.split(" - ")[1] to it.split(" - ")[0]
+        }
         .sortedWith(compareBy({ it.first.split(" ")[0] }, { it.first.split(" ")[1].toInt() }, { it.second }))
         .groupBy { it.first }
         .mapValues { (_, value) -> value.joinToString(", ") { it.second } }
@@ -153,6 +158,7 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
+//Time Complexity: O(n * m) - m max repeat number
 fun sortTemperatures(inputName: String, outputName: String) {
     val temperatures = arrayOfNulls<Int>(7731)
     try {
@@ -209,8 +215,21 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  * 2
  */
+//Time Complexity: Θ(n)
+//Memory Complexity: Θ(n)
 fun sortSequence(inputName: String, outputName: String) {
-    TODO()
+    val numbers = File(inputName).readLines()
+
+    val count = numbers.groupBy { it.toInt() }.map { it.key to it.value.size }.toMap()
+    val maxValue = count.values.max() ?: 0
+    val minValue = count.filter { it.value == maxValue }.keys.min() ?: 0
+
+    val list = numbers.filter { it.toInt() != minValue }.toMutableList()
+    repeat(maxValue) {
+        list.add(minValue.toString())
+    }
+    val text = list.joinToString("\n")
+    File(outputName).writeText(text)
 }
 
 /**
@@ -227,6 +246,7 @@ fun sortSequence(inputName: String, outputName: String) {
  *
  * Результат: second = [1 3 4 9 9 13 15 20 23 28]
  */
+//Time Complexity: Θ(nlogn)
 fun <T : Comparable<T>> mergeArrays(first: Array<T>, second: Array<T?>) {
     for (i in first.indices) {
         second[i] = first[i]

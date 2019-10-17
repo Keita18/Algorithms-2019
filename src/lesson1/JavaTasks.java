@@ -2,11 +2,6 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -103,35 +98,10 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    static public void sortTemperatures(String inputName, String outputName) { //ресурсоемкость - 1 массив на const элементов
-        Integer[] temperatures = new Integer[7731];                            //сложность O(n)
-        try (BufferedReader br = new BufferedReader(new FileReader(inputName));) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (Double.parseDouble(line) < -273.0 || Double.parseDouble(line) > 500.0) {
-                    throw new IllegalArgumentException();
-                }
-                if (temperatures[(int) (Double.parseDouble(line) * 10) + 2730] != null) {
-                    temperatures[(int) (Double.parseDouble(line) * 10) + 2730] += 1;
-                } else {
-                    temperatures[(int) (Double.parseDouble(line) * 10) + 2730] = 1;
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error");
-        }
-        try (PrintWriter pw = new PrintWriter(outputName);) {
-            for (int i = 0; i < 7731; i++) {
-                if (temperatures[i] != null) {
-                    for (int j = 0; j < temperatures[i]; j++) {
-                        pw.println(Math.round((i - 2730) * 10.0) / 100.0);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error");
-        }
+    static public void sortTemperatures(String inputName, String outputName) {
+        throw new NotImplementedError();
     }
+
 
     /**
      * Сортировка последовательности

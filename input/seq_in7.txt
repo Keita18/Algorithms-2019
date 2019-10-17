@@ -1,0 +1,14 @@
+ try {
+            sortSequence("input/seq_in6.txt", "temp.txt")
+            assertFileContent("temp.txt", """""".trimIndent())
+        } finally {
+            File("temp.txt").delete()
+        }
+
+        try {
+            assertThrows<Exception>("Incorrect format") {
+                sortSequence("input/seq_in7.txt", "temp.txt")
+            }
+        } finally {
+            File("temp.txt").delete()
+        }

@@ -2,8 +2,9 @@
 
 package lesson2
 
-import kotlin.math.abs
+import java.io.File
 import kotlin.math.sqrt
+
 
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
@@ -83,49 +84,9 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
  * но приветствуется попытка решить её самостоятельно.
  */
 fun josephTask(menNumber: Int, choiceInterval: Int): Int {
-    val list = mutableListOf<Int>()
-    if (choiceInterval == 1)
-        return menNumber
-    for (i in 1..menNumber) {
-        if (i % choiceInterval != 0) {
-            list.add(i)
-        }
-    }
-    var n = choiceInterval / menNumber
-    if (choiceInterval == menNumber) n = 0
-    var firstRemove = abs(n * menNumber - choiceInterval) - 1
-
-    while (list.size > 1) {
-        var secondRemove = firstRemove + choiceInterval - 1
-
-        if (secondRemove < list.size - 1) {
-            list.removeAt(secondRemove)
-            firstRemove = secondRemove
-            continue
-        }
-        if (secondRemove > list.size - 1) {
-            val j = secondRemove / list.size
-            secondRemove -= (j * list.size)
-            list.removeAt(secondRemove)
-            firstRemove = secondRemove
-            continue
-        }
-        if (secondRemove == list.size - 1) {
-            list.removeAt(secondRemove)
-            firstRemove = 0
-
-        }
-    }
-
-    return if (list.isNotEmpty()) list[0] else 0
+    TODO()
 }
 
-fun main() {
-    var menNumber = 2
-    val y = josephTask(10, 2)
-    println(y)
-
-}
 
 /**
  * Наибольшая общая подстрока.
@@ -138,8 +99,25 @@ fun main() {
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
  */
+//Time Complexity: Θ(n)
+//Memory Complexity: Θ(n)
 fun longestCommonSubstring(first: String, second: String): String {
-    TODO()
+    val str = StringBuilder()
+    var maxSubString = ""
+    for (j in first.indices) {
+        for (i in j until first.length) {
+            str.append(first[i])
+            if (!second.contains(str)) {
+                str.deleteCharAt(str.length - 1)
+                break
+            }
+        }
+        if (str.length > maxSubString.length) {
+            maxSubString = str.toString()
+        }
+        str.delete(0, str.length)
+    }
+    return maxSubString
 }
 
 /**
@@ -196,6 +174,90 @@ fun calcPrimesNumber(limit: Int): Int {
  * В файле буквы разделены пробелами, строки -- переносами строк.
  * Остальные символы ни в файле, ни в словах не допускаются.
  */
+//Time Complexity: O(n*m), n - number letters , m - number words
 fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
-    TODO()
+
+    val result = mutableListOf<String>()
+    var i = 0
+
+    while (i < words.size) {
+        val str = words.toList()[i]
+        val r = initialisation(inputName, str.toUpperCase())
+        if (r != "")
+            result.add(r)
+        i++
+    }
+    return result.toSet()
+}
+//Time Complexity: O(n), n - number letters
+// Memory Complexity: Θ(n)
+fun initialisation(inputName: String, words: String): String {
+
+    val map = File(inputName).readLines()
+        .map { "| ${it.toUpperCase()} |".split(" ").toTypedArray() }.toMutableList()
+
+    val protection = mutableListOf<String>()
+    for (i in map[0].indices)
+        protection.add("|")
+
+    map.add(0, protection.toTypedArray())
+    map.add(protection.toTypedArray())
+
+    val array = map.toTypedArray()
+
+    var result = false
+
+    for (i in array.indices) {
+        for (j in array[i].indices)
+            if (array[i][j] == words[0].toString()) {
+                result = searchPath(array, j, i, words)
+                if (result)
+                    break
+            }
+        if (result)
+            break
+    }
+    return if (result) words else ""
+}
+//depth first search
+fun searchPath(maze: Array<Array<String>>, x: Int, y: Int, words: String): Boolean {
+
+    val str = StringBuilder()
+    str.append(words)
+    var mot = ""
+    if (mot == words) {
+        return true
+    }
+
+    if (maze[y][x] == str.first().toString()) {
+        mot += str.first()
+        maze[y][x] = "2"
+        str.deleteCharAt(0)
+
+        // System.out.println(Arrays.deepToString(maze))
+        var dx = -1
+        var dy = 0
+        if (searchPath(maze, x + dx, y + dy, str.toString())) {
+            return true
+        }
+
+        dx = 1
+        dy = 0
+        if (searchPath(maze, x + dx, y + dy, str.toString())) {
+            return true
+        }
+
+        dx = 0
+        dy = -1
+        if (searchPath(maze, x + dx, y + dy, str.toString())) {
+            return true
+        }
+
+        dx = 0
+        dy = 1
+        if (searchPath(maze, x + dx, y + dy, str.toString())) {
+            return true
+        }
+    }
+    return false
 }

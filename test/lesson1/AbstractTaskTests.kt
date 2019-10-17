@@ -1,6 +1,7 @@
 package lesson1
 
 import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.assertThrows
 import util.PerfResult
 import util.estimate
 import java.io.BufferedWriter
@@ -45,6 +46,19 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         } finally {
             File("temp.txt").delete()
         }
+        try {
+            assertThrows<Exception>("Incorrect format") {
+                sortTimes("input/time_in4.txt", "temp.txt")
+            }
+        } finally {
+            File("temp.txt").delete()
+        }
+        try {
+            sortTimes("input/time_in5.txt", "temp.txt")
+            assertFileContent("temp.txt", """""".trimIndent())
+        } finally {
+            File("temp.txt").delete()
+        }
     }
 
     protected fun sortAddresses(sortAddresses: (String, String) -> Unit) {
@@ -70,6 +84,19 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         try {
             sortAddresses("input/addr_in3.txt", "temp.txt")
             assertFileContent("temp.txt", File("input/addr_out3.txt").readLines())
+        } finally {
+            File("temp.txt").delete()
+        }
+        try {
+            sortAddresses("input/addr_in5.txt", "temp.txt")
+            assertFileContent("temp.txt", """""".trimIndent())
+        } finally {
+            File("temp.txt").delete()
+        }
+        try {
+            assertThrows<Exception>("Incorrect format") {
+                sortAddresses("input/addr_in4.txt", "temp.txt")
+            }
         } finally {
             File("temp.txt").delete()
         }
@@ -137,6 +164,21 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         }
 
         println("sortTemperatures: $perf")
+
+        try {
+            sortTemperatures("input/temp_in2.txt", "temp.txt")
+            assertFileContent("temp.txt", """""".trimIndent())
+        } finally {
+            File("temp.txt").delete()
+        }
+
+        try {
+            assertThrows<Exception>("Incorrect format") {
+                sortTemperatures("input/temp_in3.txt", "temp.txt")
+            }
+        } finally {
+            File("temp.txt").delete()
+        }
     }
 
     private fun generateSequence(totalSize: Int, answerSize: Int): PerfResult<Unit> {
@@ -296,6 +338,20 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         }
 
         println("sortSequence: $perf")
+        try {
+            sortSequence("input/seq_in6.txt", "temp.txt")
+            assertFileContent("temp.txt", """""".trimIndent())
+        } finally {
+            File("temp.txt").delete()
+        }
+
+        try {
+            assertThrows<Exception>("Incorrect format") {
+                sortSequence("input/seq_in7.txt", "temp.txt")
+            }
+        } finally {
+            File("temp.txt").delete()
+        }
     }
 
     private fun generateArrays(
@@ -343,5 +399,11 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         }
 
         println("mergeArrays: $perf")
+
+        mergeArrays(Array(0) { 0 }, Array(0) { 0 })
+
+        val target = Array<Int?>(6) { 2 }
+        mergeArrays(Array(3) { 1 }, target)
+        assertArrayEquals(arrayOf(1, 1, 1, 2, 2, 2), target)
     }
 }
