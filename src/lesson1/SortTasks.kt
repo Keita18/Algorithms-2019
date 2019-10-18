@@ -76,13 +76,13 @@ fun sortTimes(inputName: String, outputName: String) { //сложность O(nl
     }
     sort(amList, "AM")
     sort(pmList, "PM")
-    var text = amList.joinToString("\n") {
+
+    val text = amList.joinToString("\n") {
         "$it AM"
-    }
-    text += "\n"
-    text += pmList.joinToString("\n") {
+    } + "\n" + pmList.joinToString("\n") {
         "$it PM"
     }
+
     File(outputName).writeText(text)
 
 }
@@ -158,7 +158,8 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
-//Time Complexity: O(n * m) - m max repeat number
+//Time Complexity: O(n * m) - m max of repeated number
+// ex : m = 2 for -12.6 -> O(n)
 fun sortTemperatures(inputName: String, outputName: String) {
     val temperatures = arrayOfNulls<Int>(7731)
     try {

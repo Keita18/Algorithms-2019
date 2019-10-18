@@ -191,14 +191,21 @@ fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
 }
 //Time Complexity: O(n), n - number letters
 // Memory Complexity: Θ(n)
+/**
+ * we initialise the array for each word , because array are an object and DFS mark
+ * the visited node, the contents of the table change
+ * val protection ($): to avoid outOfBoundsException
+ * so no word can contain this character
+ * */
 fun initialisation(inputName: String, words: String): String {
+    require(!words.contains('$')) { "$" }
 
     val map = File(inputName).readLines()
-        .map { "| ${it.toUpperCase()} |".split(" ").toTypedArray() }.toMutableList()
+        .map { "$ ${it.toUpperCase()} $".split(" ").toTypedArray() }.toMutableList()
 
-    val protection = mutableListOf<String>()
+    val protection = mutableListOf<String>() // to avoid outOfBoundsException
     for (i in map[0].indices)
-        protection.add("|")
+        protection.add("$")
 
     map.add(0, protection.toTypedArray())
     map.add(protection.toTypedArray())
@@ -219,7 +226,10 @@ fun initialisation(inputName: String, words: String): String {
     }
     return if (result) words else ""
 }
-//depth first search
+
+/**
+ * depth first search
+ * */
 fun searchPath(maze: Array<Array<String>>, x: Int, y: Int, words: String): Boolean {
 
     val str = StringBuilder()
@@ -231,7 +241,7 @@ fun searchPath(maze: Array<Array<String>>, x: Int, y: Int, words: String): Boole
 
     if (maze[y][x] == str.first().toString()) {
         mot += str.first()
-        maze[y][x] = "2"
+        maze[y][x] = "2"      // node visited
         str.deleteCharAt(0)
 
         // System.out.println(Arrays.deepToString(maze))
