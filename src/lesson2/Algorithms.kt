@@ -122,6 +122,7 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
     }
     return result + 1
 }
+
 /**
 fun myFun(menNumber: Int, choiceInterval: Int): Int {
 if (menNumber == 1) return 0
