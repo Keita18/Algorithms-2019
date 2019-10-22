@@ -35,56 +35,50 @@ import java.io.PrintWriter
  * 07:56:14 PM
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
+ *
+ * Time Complexity: O(nlogn)
+ * Memory Complexity: Θ(n), n - the number of lines
  */
-fun sortTimes(inputName: String, outputName: String) { //сложность O(nlogn)
-    val amList = mutableListOf<String>()
-    val pmList = mutableListOf<String>()
+fun sortTimes(inputName: String, outputName: String) {
 
-    File(inputName).readLines().map {
-        require(Regex("""^\d\d:\d\d:\d\d (AM|PM)""").matches(it)) { it }
-        val period = it.split(" ")[1]
-        val time = it.split(" ")[0]
-
-        if (period == "AM")
-            amList.add(time)
-        else pmList.add(time)
-        it
-    }
-
-    fun sort(m: MutableList<String>, period: String): MutableList<String> {
-        m.sortWith(
-            compareBy(
-                {
-                    val hours = it.split(":")[0].toInt()
-                    require(hours in 0..12)
-                    hours + if (period == "AM" && hours == 12) -12
-                    else if (period == "PM" && hours != 12) 12
-                    else 0
-
-                },
-                {
-                    require(it.split(":")[1].toInt() in 0..60)
-                    it.split(":")[1].toInt()
-                },
-                {
-                    require(it.split(":")[2].toInt() in 0..60)
-                    it.split(":")[2].toInt()
-                }
-            )
-        )
-        return m
-    }
-    sort(amList, "AM")
-    sort(pmList, "PM")
-
-    val text = amList.joinToString("\n") {
-        "$it AM"
-    } + "\n" + pmList.joinToString("\n") {
-        "$it PM"
-    }
-
+    val text = File(inputName).readLines()
+        // linear time & memory
+        .map {
+            require(Regex("""^\d\d:\d\d:\d\d (AM|PM)""").matches(it)) { it }
+            val time = it.split(" ")[0]
+            val types = it.split(" ")[1]
+            val result = timeStrToSeconds(time, types)
+            result to it
+        }
+        //O(nlogn) time & Θ(1) memory
+        .sortedBy { it.first }
+        // linear time
+        .joinToString("\n") { it.second }
     File(outputName).writeText(text)
 
+}
+
+//Time Complexity: O(1)
+// Memory Complexity: Θ(1)
+fun timeStrToSeconds(str: String, types: String): Int {
+    val parts = str.split(":").toTypedArray() // size = 3
+    if (types == "AM") { // 12am = 00ч
+        val first = parts[0].toInt()
+        if (first == 12)
+            parts[0] = "0"
+    }
+
+    var result = 0
+    //O(3) {hours , minutes, seconds} -> O(1)
+    for (part in parts) {
+        val number = part.toInt()
+        result = result * 60 + number
+        if (types == "PM") { //1pm = 13ч
+            if (parts.first().toInt() != 12)
+                result += 12 * 3600
+        }
+    }
+    return result
 }
 
 /**
@@ -111,20 +105,29 @@ fun sortTimes(inputName: String, outputName: String) { //сложность O(nl
  * Садовая 5 - Сидоров Петр, Сидорова Мария
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
+ *
+ * Time Complexity: O(n * P) - n number of line in inputName , P number of person per address
+ * or O(nlogn) if P << n
+ * Memory Complexity: O(n)
  */
-//Time Complexity: O(nlogn)
-// Memory Complexity: O(1)
 fun sortAddresses(inputName: String, outputName: String) {
 
     val text = File(inputName).readLines()
+        // linear time & memory
         .map {
             require(Regex("""(\S+ \S+) - (\S+) (\d+)""").matches(it)) { it }
             it.split(" - ")[1] to it.split(" - ")[0]
         }
+        // O(nlogn) time & O(1) memory
         .sortedWith(compareBy({ it.first.split(" ")[0] }, { it.first.split(" ")[1].toInt() }, { it.second }))
+        //linear time and probably linear memory
         .groupBy { it.first }
+        //linear time * probably P - number of person in list
         .mapValues { (_, value) -> value.joinToString(", ") { it.second } }
-        .map { it.key + " - " + it.value }.joinToString("\n")
+        // linear time & memory
+        .map { it.key + " - " + it.value }
+        // linear
+        .joinToString("\n")
     File(outputName).writeText(text)
 }
 
@@ -157,9 +160,11 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 24.7
  * 99.5
  * 121.3
+ *
+ *
+ * Time Complexity: O(n) n - number of line
+ * Memory complexity: O(1) {one table with constant size}
  */
-//Time Complexity: O(n * m) - m max of repeated number
-// ex : m = 2 for -12.6 -> O(n)
 fun sortTemperatures(inputName: String, outputName: String) {
     val temperatures = arrayOfNulls<Int>(7731)
     try {
@@ -177,9 +182,9 @@ fun sortTemperatures(inputName: String, outputName: String) {
 
     try {
         PrintWriter(outputName).use { pw ->
-            for (i in 0..7730)
+            for (i in 0..7730) // linear times n
                 if (temperatures[i] != null)
-                    for (j in 1..temperatures[i]!!)
+                    for (j in 1..temperatures[i]!!) // linear times m
                         pw.println(((i - 2730)) / 10.0)
         }
     } catch (e: IOException) {
@@ -215,21 +220,25 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  * 2
  * 2
+ *
+ *
+ * Time Complexity: Θ(n)
+ * Memory Complexity: Θ(n)
  */
-//Time Complexity: Θ(n)
-//Memory Complexity: Θ(n)
 fun sortSequence(inputName: String, outputName: String) {
+
     val numbers = File(inputName).readLines()
 
-    val count = numbers.groupBy { it.toInt() }.map { it.key to it.value.size }.toMap()
-    val maxValue = count.values.max() ?: 0
-    val minValue = count.filter { it.value == maxValue }.keys.min() ?: 0
+    val count = numbers.groupBy { it.toInt() }.map { it.key to it.value.size }.toMap() // linear
 
-    val list = numbers.filter { it.toInt() != minValue }.toMutableList()
+    val maxValue = count.values.max() ?: 0  // linear
+    val minValue = count.filter { it.value == maxValue }.keys.min() ?: 0  // linear
+
+    val list = numbers.filter { it.toInt() != minValue }.toMutableList() // linear
     repeat(maxValue) {
         list.add(minValue.toString())
     }
-    val text = list.joinToString("\n")
+    val text = list.joinToString("\n") // linear
     File(outputName).writeText(text)
 }
 
@@ -246,11 +255,23 @@ fun sortSequence(inputName: String, outputName: String) {
  * second = [null null null null null 1 3 9 13 18 23]
  *
  * Результат: second = [1 3 4 9 9 13 15 20 23 28]
+ *
+ *
+ * Time Complexity: Θ(n), n - length of the second array
+ * Memory Complexity: Θ(1)
  */
-//Time Complexity: Θ(nlogn)
 fun <T : Comparable<T>> mergeArrays(first: Array<T>, second: Array<T?>) {
-    for (i in first.indices) {
-        second[i] = first[i]
+    var secondIndex = first.size
+    var firstIndex = 0
+
+    for (it in second.indices) {
+        if (
+            secondIndex >= second.size ||
+            firstIndex < first.size && first[firstIndex] <= second[secondIndex]!!
+        ) {
+            second[it] = first[firstIndex++]
+        } else {
+            second[it] = second[secondIndex++]
+        }
     }
-    second.sort()
 }

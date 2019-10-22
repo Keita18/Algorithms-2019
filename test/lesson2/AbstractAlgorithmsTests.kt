@@ -1,7 +1,9 @@
 package lesson2
 
+import org.junit.jupiter.api.assertThrows
 import java.io.BufferedWriter
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -71,6 +73,15 @@ abstract class AbstractAlgorithmsTests {
             assertEquals(1, josephTask(menNumber, 2))
             menNumber *= 2
         }
+        assertEquals(120, josephTask(222, 22))
+        assertEquals(12, josephTask(22, 222))
+        assertEquals(1763, josephTask(1998, 7))
+
+        assertThrows<IllegalArgumentException> { josephTask(0, 11) }
+        assertThrows<IllegalArgumentException> { josephTask(0, 0) }
+        assertThrows<IllegalArgumentException> { josephTask(1998, 0) }
+
+
     }
 
     fun longestCommonSubstring(longestCommonSubstring: (String, String) -> String) {

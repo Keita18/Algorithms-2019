@@ -29,9 +29,34 @@ import kotlin.math.sqrt
  * Например, для приведённого выше файла результат должен быть Pair(3, 4)
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
+ *
+ * Time Complexity: Θ(n), n - number of lines (number)
+ * Memory Complexity: Θ(1)
  */
 fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
-    TODO()
+    val prices = File(inputName).readLines()
+        .map {
+            require(Regex("""\d+""").matches(it)) { "Error $it" }  // linear
+            it.toInt()
+        }
+    require(prices.isNotEmpty()) { "Error input isNotEmpty" }
+
+    var j = 0
+    var bestTimeBuy = 0 to 0
+    var bestGain = 0
+
+    for (i in 1 until prices.size) { // linear
+        if (prices[i] < prices[j]) {
+            j = i
+            continue
+        }
+        val gain = prices[i] - prices[j]
+        if (gain > bestGain) {
+            bestTimeBuy = j + 1 to i + 1
+            bestGain = gain
+        }
+    }
+    return bestTimeBuy
 }
 
 /**
@@ -82,9 +107,19 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
  *
  * Общий комментарий: решение из Википедии для этой задачи принимается,
  * но приветствуется попытка решить её самостоятельно.
+ *
+ * Time Complexity: Θ(n), n - menNumber
+ * Memory Complexity: Θ(1)
  */
 fun josephTask(menNumber: Int, choiceInterval: Int): Int {
-    TODO()
+    var result = 0
+    if (choiceInterval == 1) {
+        return menNumber
+    }
+    for (i in 1..menNumber) {
+        result = (result + choiceInterval) % i
+    }
+    return result + 1
 }
 
 
@@ -98,9 +133,10 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * При сравнении подстрок, регистр символов *имеет* значение.
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
+ *
+ * Time Complexity: Θ(n^2) n - length of word
+ * Memory Complexity: Θ(1)
  */
-//Time Complexity: Θ(n)
-//Memory Complexity: Θ(n)
 fun longestCommonSubstring(first: String, second: String): String {
     val str = StringBuilder()
     var maxSubString = ""
@@ -129,13 +165,22 @@ fun longestCommonSubstring(first: String, second: String): String {
  *
  * Справка: простым считается число, которое делится нацело только на 1 и на себя.
  * Единица простым числом не считается.
+ *
+ * Time complexity: O(n*sqrt(n))
+ * Memory complexity: O(1)
  */
 fun calcPrimesNumber(limit: Int): Int {
-    fun isPrime(n: Int): Boolean {
+
+    fun isPrime(n: Int): Boolean { // O(sqrt(n))
+        var answer = 0
         if (n < 2) return false
-        if (n == 2) return true
+        if (n == 2) {
+            return true
+        }
         if (n % 2 == 0) return false
         for (m in 3..sqrt(n.toDouble()).toInt() step 2) {
+            if (n % m != 0)
+                answer++
             if (n % m == 0) return false
         }
         return true
@@ -173,8 +218,9 @@ fun calcPrimesNumber(limit: Int): Int {
  * Все слова и буквы -- русские или английские, прописные.
  * В файле буквы разделены пробелами, строки -- переносами строк.
  * Остальные символы ни в файле, ни в словах не допускаются.
+ *
+ * Time Complexity: O(n*m), n - number letters , m - number words
  */
-//Time Complexity: O(n*m), n - number letters , m - number words
 fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
 
     val result = mutableListOf<String>()
@@ -183,7 +229,7 @@ fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
     while (i < words.size) {
         val str = words.toList()[i]
         val r = initialisation(inputName, str.toUpperCase())
-        if (r != "")
+        if (r != null)
             result.add(r)
         i++
     }
@@ -197,34 +243,34 @@ fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
  * val protection ($): to avoid outOfBoundsException
  * so no word can contain this character
  * */
-fun initialisation(inputName: String, words: String): String {
+fun initialisation(inputName: String, words: String): String? {
     require(!words.contains('$')) { "$" }
 
-    val map = File(inputName).readLines()
+    val firstTableWords = File(inputName).readLines()
         .map { "$ ${it.toUpperCase()} $".split(" ").toTypedArray() }.toMutableList()
 
     val protection = mutableListOf<String>() // to avoid outOfBoundsException
-    for (i in map[0].indices)
+    for (i in firstTableWords[0].indices)
         protection.add("$")
 
-    map.add(0, protection.toTypedArray())
-    map.add(protection.toTypedArray())
+    firstTableWords.add(0, protection.toTypedArray())
+    firstTableWords.add(protection.toTypedArray())
 
-    val array = map.toTypedArray()
+    val arrayWords = firstTableWords.toTypedArray()
 
     var result = false
 
-    for (i in array.indices) {
-        for (j in array[i].indices)
-            if (array[i][j] == words[0].toString()) {
-                result = searchPath(array, j, i, words)
+    for (i in arrayWords.indices) {
+        for (j in arrayWords[i].indices)
+            if (arrayWords[i][j] == words[0].toString()) {
+                result = searchPath(arrayWords, j, i, words)
                 if (result)
                     break
             }
         if (result)
             break
     }
-    return if (result) words else ""
+    return if (result) words else null
 }
 
 /**
