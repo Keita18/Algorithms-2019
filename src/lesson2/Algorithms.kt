@@ -113,6 +113,7 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
  */
 fun josephTask(menNumber: Int, choiceInterval: Int): Int {
     var result = 0
+    require(menNumber != 0 && choiceInterval != 0)
     if (choiceInterval == 1) {
         return menNumber
     }
@@ -121,6 +122,25 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
     }
     return result + 1
 }
+/**
+fun myFun(menNumber: Int, choiceInterval: Int): Int {
+if (menNumber == 1) return 0
+if (menNumber == 2 && choiceInterval <= menNumber) return abs(menNumber - choiceInterval)
+if (choiceInterval == 1) return menNumber - 1
+if (choiceInterval > menNumber)
+return (myFun(menNumber - 1, choiceInterval) + choiceInterval) % menNumber
+
+val cnt = menNumber / choiceInterval
+var res = myFun(menNumber - cnt, choiceInterval)
+res -= menNumber % choiceInterval
+
+res += if (res < 0)
+menNumber
+else
+res / (choiceInterval - 1)
+return res
+}
+ * */
 
 
 /**
