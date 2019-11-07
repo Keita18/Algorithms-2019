@@ -12,7 +12,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
     override var size = 0
         private set
 
-    private class Node<T>(val value: T) {
+    private class Node<T>(var value: T) {
 
         var left: Node<T>? = null
 
@@ -62,8 +62,40 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Удаление элемента в дереве
      * Средняя
      */
+
     override fun remove(element: T): Boolean {
-        TODO()
+        if (contains(element)) {
+            root = delete(root, element)
+            return true
+        }
+        return false
+    }
+
+    private fun delete(root: Node<T>?, toDelete: T): Node<T>? {
+        var currentRoot = root
+        when {
+            currentRoot == null -> throw RuntimeException("cannot delete.")
+            toDelete < currentRoot.value -> currentRoot.left = delete(currentRoot.left, toDelete)
+            toDelete > currentRoot.value -> currentRoot.right = delete(currentRoot.right, toDelete)
+            else -> when {
+                currentRoot.left == null -> return currentRoot.right
+                currentRoot.right == null -> return currentRoot.left
+                else -> {
+                    // get data from the rightmost node in the left subtree
+                    currentRoot.value = retrieveData(currentRoot.left!!)
+                    // delete the rightmost node in the left subtree
+                    currentRoot.left = delete(currentRoot.left, currentRoot.value)
+                }
+            }
+        }
+        return currentRoot
+    }
+
+    private fun retrieveData(currentRoot: Node<T>): T {
+        var p = currentRoot
+        while (p.right != null) p = p.right!!
+
+        return p.value
     }
 
     override operator fun contains(element: T): Boolean {
