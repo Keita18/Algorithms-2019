@@ -17,6 +17,8 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
         var left: Node<T>? = null
 
         var right: Node<T>? = null
+
+        var parent: Node<T>? = null
     }
 
     override fun add(element: T): Boolean {
@@ -31,10 +33,12 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
             comparison < 0 -> {
                 assert(closest.left == null)
                 closest.left = newNode
+                newNode.parent = closest
             }
             else -> {
                 assert(closest.right == null)
                 closest.right = newNode
+                newNode.parent = closest
             }
         }
         size++
@@ -62,41 +66,44 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Удаление элемента в дереве
      * Средняя
      */
-
     override fun remove(element: T): Boolean {
-        if (contains(element)) {
-            root = delete(root, element)
-            return true
+        val toDelete: Node<T>? = find(element) ?: return false
+
+        if (toDelete!!.left == null || toDelete.right == null)
+            splice(toDelete)
+        else {
+            var minRightMost = toDelete.right
+            while (minRightMost!!.left != null)
+                minRightMost = minRightMost.left
+            toDelete.value = minRightMost.value
+            splice(minRightMost)
         }
-        return false
+        return true
     }
 
-    private fun delete(root: Node<T>?, toDelete: T): Node<T>? {
-        var currentRoot = root
+    private fun splice(toDelete: Node<T>) {
+        val parent: Node<T>?
+        var s: Node<T>? = null
         when {
-            currentRoot == null -> throw RuntimeException("cannot delete.")
-            toDelete < currentRoot.value -> currentRoot.left = delete(currentRoot.left, toDelete)
-            toDelete > currentRoot.value -> currentRoot.right = delete(currentRoot.right, toDelete)
-            else -> when {
-                currentRoot.left == null -> return currentRoot.right
-                currentRoot.right == null -> return currentRoot.left
-                else -> {
-                    // get data from the rightmost node in the left subtree
-                    currentRoot.value = retrieveData(currentRoot.left!!)
-                    // delete the rightmost node in the left subtree
-                    currentRoot.left = delete(currentRoot.left, currentRoot.value)
-                }
+            toDelete.left != null -> s = toDelete.left!!
+            toDelete.right != null -> s = toDelete.right!!
+        }
+        if (toDelete == root) {
+            root = s
+            parent = null
+        } else {
+            parent = toDelete.parent
+            println(parent?.value)
+            when (toDelete) {
+                parent?.left -> parent.left = s
+                parent?.right -> parent.right = s
             }
         }
-        return currentRoot
+        if (s != null)
+            s.parent = parent
+        size--
     }
 
-    private fun retrieveData(currentRoot: Node<T>): T {
-        var p = currentRoot
-        while (p.right != null) p = p.right!!
-
-        return p.value
-    }
 
     override operator fun contains(element: T): Boolean {
         val closest = find(element)
