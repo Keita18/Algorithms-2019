@@ -72,11 +72,11 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
         if (toDelete!!.left == null || toDelete.right == null)
             splice(toDelete)
         else {
-            var minRightMost = toDelete.right
-            while (minRightMost!!.left != null)
-                minRightMost = minRightMost.left
-            toDelete.value = minRightMost.value
-            splice(minRightMost)
+            var minRight = toDelete.right
+            while (minRight!!.left != null)
+                minRight = minRight.left
+            toDelete.value = minRight.value
+            splice(minRight)
         }
         return true
     }
@@ -147,9 +147,11 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
          * Поиск следующего элемента
          * Средняя
          */
+        var result: T? = null
+
         override fun next(): T {
             var node = stack.pop()
-            val result = node.value
+            result = node.value
             if (node.right != null) {
                 node = node.right
                 while (node != null) {
@@ -157,7 +159,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
                     node = node.left
                 }
             }
-            return result
+            return result!!
         }
 
         /**
@@ -165,8 +167,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
          * Сложная
          */
         override fun remove() {
-            // TODO
-            throw NotImplementedError()
+            this@KtBinaryTree.remove(result)
         }
     }
 
@@ -215,3 +216,13 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
     }
 }
 
+fun main() {
+    val binaryTree = KtBinaryTree<Int>()
+
+    for (i in 0..25 step 3)
+        binaryTree.add(i)
+    println("binaryTree -> $binaryTree")
+
+    val subset = binaryTree.subSet(9, 21)
+    println("subset -> $subset")
+}
