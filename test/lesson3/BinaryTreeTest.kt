@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class BinaryTreeTest {
+class BinaryTreeTes {
     private fun testAdd(create: () -> CheckableSortedSet<Int>) {
         val tree = create()
         assertEquals(0, tree.size)

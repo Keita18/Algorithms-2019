@@ -5,12 +5,11 @@ import kotlin.NoSuchElementException
 import kotlin.math.max
 
 // Attention: comparable supported but comparator is not
-class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSortedSet<T> {
+open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSortedSet<T> {
 
     private var root: Node<T>? = null
 
     override var size = 0
-        private set
 
     private class Node<T>(var value: T) {
 
@@ -65,6 +64,8 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
     /**
      * Удаление элемента в дереве
      * Средняя
+     *
+     * Time Complexity O(h) - h height of tree
      */
     override fun remove(element: T): Boolean {
         val toDelete: Node<T>? = find(element) ?: return false
@@ -93,7 +94,6 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
             parent = null
         } else {
             parent = toDelete.parent
-            println(parent?.value)
             when (toDelete) {
                 parent?.left -> parent.left = s
                 parent?.right -> parent.right = s
@@ -138,6 +138,8 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
         /**
          * Проверка наличия следующего элемента
          * Средняя
+         *
+         * Time Complexity O(1)
          */
         override fun hasNext(): Boolean {
             return stack.isNotEmpty()
@@ -147,7 +149,6 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
          * Поиск следующего элемента
          * Средняя
          */
-        var result: T? = null
 
         override fun next(): T {
             var node = stack.pop()
@@ -161,6 +162,9 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
             }
             return result!!
         }
+
+        var result: T? = null
+
 
         /**
          * Удаление следующего элемента
@@ -180,7 +184,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Очень сложная
      */
     override fun subSet(fromElement: T, toElement: T): SortedSet<T> {
-        TODO()
+        return SubsetTree(fromElement, toElement, this)
     }
 
     /**
@@ -188,7 +192,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Сложная
      */
     override fun headSet(toElement: T): SortedSet<T> {
-        TODO()
+        return SubsetTree(null, toElement, this)
     }
 
     /**
@@ -196,7 +200,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Сложная
      */
     override fun tailSet(fromElement: T): SortedSet<T> {
-        TODO()
+        return SubsetTree(fromElement, null, this)
     }
 
     override fun first(): T {
@@ -216,6 +220,95 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
     }
 }
 
+class SubsetTree<T : Comparable<T>>
+    (
+    private val fromElement: T?,                 //up border
+    private val toElement: T?,                  //bottom border
+    private val delegate: KtBinaryTree<T>
+) : KtBinaryTree<T>() {
+
+    override var size: Int
+        get() {
+            var size = 0
+            for (next in delegate) {
+                if (checkBounds(next)) size++
+            }
+            return size
+        }
+        set(value) {}
+
+    private fun checkBounds(value: T): Boolean {
+        return if (fromElement != null && toElement != null)
+            toElement > value && fromElement <= value
+        else if (fromElement == null)
+            toElement!! > value
+        else
+            fromElement <= value
+    }
+
+    override operator fun contains(element: T): Boolean {
+        if (!checkBounds(element))
+            return false
+        return delegate.contains(element)
+    }
+
+    override fun add(element: T): Boolean {
+        if (checkBounds(element)) {
+            delegate.add(element)
+            return true
+        } else throw IllegalArgumentException()
+    }
+
+    override fun remove(element: T): Boolean {
+
+        if (checkBounds(element) && contains(element))
+            delegate.remove(element)
+        else
+            throw IllegalArgumentException()
+        return true
+    }
+
+    override fun iterator(): MutableIterator<T> {
+        return SubSetIterator()
+    }
+
+    inner class SubSetIterator : MutableIterator<T> {
+
+        internal var iterator: MutableIterator<T> = delegate.iterator()
+        private var current: T? = null
+        internal var next = findNext()
+
+        private fun findNext(): T? {
+            if (fromElement != null) {
+                next = fromElement
+            }
+            while (iterator.hasNext()) {
+                val nextElement = iterator.next()
+                if (checkBounds(nextElement)) {
+                    next = nextElement
+                    return nextElement
+                }
+            }
+            return null
+        }
+
+        override fun hasNext(): Boolean {
+            return next != null
+        }
+
+        override fun next(): T {
+            if (next == null) throw NoSuchElementException()
+            current = next
+            next = findNext()
+            return current!!
+        }
+
+        override fun remove() {
+            iterator.remove()
+        }
+    }
+}
+
 fun main() {
     val binaryTree = KtBinaryTree<Int>()
 
@@ -224,5 +317,10 @@ fun main() {
     println("binaryTree -> $binaryTree")
 
     val subset = binaryTree.subSet(9, 21)
-    println("subset -> $subset")
+    var first = subset.first()
+    println("subset -> $subset , firt -> $first")
+
+    val subsubset = subset.subSet(10, 16)
+    first = subsubset.first()
+    println("subsubset -> $subsubset,  firt -> $first")
 }
