@@ -67,6 +67,7 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
      *
      * Time Complexity O(h) - h height of tree
      * Memory Complexity O(1)
+     * root is already declared so only toDelete, parent and change we declare
      */
     override fun remove(element: T): Boolean {
         val toDelete: Node<T>? = find(element) ?: return false
@@ -75,8 +76,10 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
             splice(toDelete)
         else {
             var minRight = toDelete.right
-            while (minRight!!.left != null)
+
+            while (minRight!!.left != null) // time complexity in worst O(h)
                 minRight = minRight.left
+
             toDelete.value = minRight.value
             splice(minRight)
         }
@@ -85,23 +88,23 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
 
     private fun splice(toDelete: Node<T>) {
         val parent: Node<T>?
-        var s: Node<T>? = null
+        var change: Node<T>? = null
         when {
-            toDelete.left != null -> s = toDelete.left!!
-            toDelete.right != null -> s = toDelete.right!!
+            toDelete.left != null -> change = toDelete.left!!
+            toDelete.right != null -> change = toDelete.right!!
         }
         if (toDelete == root) {
-            root = s
+            root = change
             parent = null
         } else {
             parent = toDelete.parent
             when (toDelete) {
-                parent?.left -> parent.left = s
-                parent?.right -> parent.right = s
+                parent?.left -> parent.left = change
+                parent?.right -> parent.right = change
             }
         }
-        if (s != null)
-            s.parent = parent
+        if (change != null)
+            change.parent = parent
         size--
     }
 
@@ -134,14 +137,18 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
                 stack.push(node)
                 node = node.left
             }
-        }
+        }  // Memory O(h) and Time Complexity O(h)
 
         /**
          * Проверка наличия следующего элемента
          * Средняя
          *
+         *
+         * Stack is already declared in Constructor
+         * here we just use it and verify if isNotEmpty, so ->
+         *
          * Time Complexity O(1)
-         * Memory Complexity O(h)
+         * Memory Complexity O(1)
          */
         override fun hasNext(): Boolean {
             return stack.isNotEmpty()
@@ -151,14 +158,17 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
          * Поиск следующего элемента
          * Средняя
          *
-         * Time Complexity O(1)
-         * Memory Complexity O(h)
+         *
+         * Time Complexity O(1) -> in worst O(h)
+         * Memory Complexity O(1)
          */
         override fun next(): T {
             var node = stack.pop()
             result = node.value
             if (node.right != null) {
                 node = node.right
+
+                /**in worst O(h)*/
                 while (node != null) {
                     stack.push(node)
                     node = node.left
@@ -190,8 +200,8 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
      * Найти множество всех элементов в диапазоне [fromElement, toElement)
      * Очень сложная
      *
-     * Time Complexity O(n) - n number of nodes
-     * Memory Complexity O(n)
+     * Time Complexity O(1)
+     * Memory Complexity O(1)
      */
     override fun subSet(fromElement: T, toElement: T): SortedSet<T> {
         return GenericSortedSet(fromElement, toElement, this)
@@ -201,8 +211,8 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
      * Найти множество всех элементов меньше заданного
      * Сложная
      *
-     * Time Complexity O(n) - n number of nodes
-     * Memory Complexity O(n)
+     * Time Complexity O(1)
+     * Memory Complexity O(1)
      */
     override fun headSet(toElement: T): SortedSet<T> {
         return GenericSortedSet(null, toElement, this)
@@ -212,8 +222,8 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
      * Найти множество всех элементов больше или равных заданного
      * Сложная
      *
-     * Time Complexity O(n) - n number of nodes
-     * Memory Complexity O(n)
+     * Time Complexity O(1)
+     * Memory Complexity O(1)
      */
     override fun tailSet(fromElement: T): SortedSet<T> {
         return GenericSortedSet(fromElement, null, this)
@@ -234,24 +244,4 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
         }
         return current.value
     }
-}
-
-fun main() {
-    val binaryTree = KtBinaryTree<Int>()
-
-    for (i in 0..25 step 3)
-        binaryTree.add(i)
-    var first = binaryTree.first()
-    var heigth = binaryTree.height()
-    println("binaryTree -> $binaryTree, first -> $first, height -> $heigth")
-
-
-    val subset = binaryTree.subSet(9, 21)
-    heigth = subset.size
-    first = subset.first()
-    println("subset -> $subset , firt -> $first ,size -> $heigth")
-
-    val subsubset = subset.subSet(10, 16)
-    first = subsubset.first()
-    println("subsubset -> $subsubset,  firt -> $first")
 }
