@@ -144,11 +144,8 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
          * Средняя
          *
          *
-         * Stack is already declared in Constructor
-         * here we just use it and verify if isNotEmpty, so ->
-         *
          * Time Complexity O(1)
-         * Memory Complexity O(1)
+         * Memory Complexity O(h) { if we consider 'stack' here }
          */
         override fun hasNext(): Boolean {
             return stack.isNotEmpty()
@@ -159,8 +156,8 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
          * Средняя
          *
          *
-         * Time Complexity O(1) -> in worst O(h)
-         * Memory Complexity O(1)
+         * Time Complexity O(h)
+         * Memory Complexity O(h)
          */
         override fun next(): T {
             var node = stack.pop()

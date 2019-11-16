@@ -23,8 +23,7 @@ class GenericSortedSet<T : Comparable<T>>(
     }
 
     /**
-     * Time Complexity O(d) - d numbers of element between the KtBinary.First
-     * and the first element >= fromElement contains in this
+     * Time Complexity O(n) in worst cage
      * Memory Complexity O(1)
      */
     override fun first(): T? {
@@ -40,7 +39,7 @@ class GenericSortedSet<T : Comparable<T>>(
     }
 
     /**
-     * Time Complexity in worst case O(n-1) - n number of element in KtBinary
+     * Time Complexity in worst case O(n-1) -> O(n) - n number of element in KtBinary
      * if toElement == KtBinary.last
      * Memory Complexity O(1)
      */
