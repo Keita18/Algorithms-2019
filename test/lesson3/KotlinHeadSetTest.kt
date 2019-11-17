@@ -41,4 +41,10 @@ class KotlinHeadSetTest : AbstractHeadTailTest() {
         doSubSetTest()
         doSubSetRelationTest()
     }
+
+    @Test
+    @Tag("Impossible")
+    fun genericSortedSetTest() {
+        doTestGenericSortedSetIterator()
+    }
 }

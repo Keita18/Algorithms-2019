@@ -33,6 +33,12 @@ class BinaryTreeTes {
         assertTrue(tree.checkInvariant())
         assertEquals(1, tree.first())
         assertEquals(20, tree.last())
+
+        val random = (167..97561).random()
+        tree.add(random)
+        assertEquals(10, tree.size)
+        assertTrue(tree.contains(random))
+        assertEquals(random, tree.last())
     }
 
     @Test
@@ -66,6 +72,7 @@ class BinaryTreeTes {
             val originalHeight = binarySet.height()
             val toRemove = list[random.nextInt(list.size)]
             val oldSize = binarySet.size
+
             assertTrue(binarySet.remove(toRemove))
             assertEquals(oldSize - 1, binarySet.size)
             println("Removing $toRemove from $list")
@@ -76,6 +83,8 @@ class BinaryTreeTes {
                     "$element should be ${if (inn) "in" else "not in"} tree"
                 )
             }
+            list.remove(toRemove)
+
             assertTrue(binarySet.checkInvariant(), "Binary tree invariant is false after tree.remove()")
             assertTrue(
                 binarySet.height() <= originalHeight,
@@ -84,10 +93,45 @@ class BinaryTreeTes {
         }
     }
 
+    private fun testRemove2(create: () -> CheckableSortedSet<Int>) {
+        val random = Random()
+        val binarySet = create()
+        val list = mutableSetOf<Int>()
+
+        for (iteration in 1..100) {
+            for (i in 1..20) {
+                list.add(random.nextInt(100))
+                binarySet.add(random.nextInt(100))
+            }
+        }
+
+        //~~~~~~~~//
+        val last = list.max()
+        val first = list.min()
+        assertEquals(last, binarySet.last())
+        assertEquals(first, binarySet.first())
+
+        binarySet.remove(last)
+        assertFalse(binarySet.contains(last))
+        assertTrue(binarySet.contains(first))
+
+        var i = 0
+        val oldSize = binarySet.size
+        val myRandom = (first!!..(last!! / 2)).random()
+        for (j in 0 until binarySet.last() step myRandom)
+            if (binarySet.contains(j)) {
+                binarySet.remove(j)
+                i++
+                assertTrue(list.contains(j))
+            }
+        assertEquals(oldSize - i, binarySet.size)
+    }
+
     @Test
     @Tag("Normal")
     fun testRemoveKotlin() {
         testRemove { createKotlinTree() }
+        testRemove2 { createKotlinTree() }
     }
 
     @Test

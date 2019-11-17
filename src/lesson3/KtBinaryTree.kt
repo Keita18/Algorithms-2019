@@ -145,7 +145,7 @@ open class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableS
          *
          *
          * Time Complexity O(1)
-         * Memory Complexity O(h) { if we consider 'stack' here }
+         * Memory Complexity O(h) { considering 'stack' here }
          */
         override fun hasNext(): Boolean {
             return stack.isNotEmpty()

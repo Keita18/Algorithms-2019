@@ -151,4 +151,69 @@ abstract class AbstractHeadTailTest {
         assertEquals(14, tree.size)
     }
 
+    protected fun doTestGenericSortedSetIterator() {
+        val ktBinaryTree = KtBinaryTree<Int>()
+        val ktSortedSetTail = sortedSetOf<Int>()
+        val ktSortedSetHead = sortedSetOf<Int>()
+        val ktSortedSetSubset = sortedSetOf<Int>()
+
+        val fromElement = (1..24).random()
+        val toElement = (200..254).random()
+        for (i in 0..255 step fromElement) {
+            ktBinaryTree.add(i)
+            if (i < toElement)
+                ktSortedSetHead.add(i)
+            if (i in fromElement until toElement)
+                ktSortedSetSubset.add(i)
+            if (i >= fromElement)
+                ktSortedSetTail.add(i)
+        }
+        println("toEle $toElement and fromEl $fromElement")
+        val ktBinaryTreeTail = ktBinaryTree.tailSet(toElement)
+        val subsetKtBinaryTree = ktBinaryTree.subSet(fromElement, toElement)
+        val headKtBinaryTree = ktBinaryTree.headSet(toElement)
+
+        assertEquals(ktSortedSetHead, headKtBinaryTree)
+        assertEquals(ktSortedSetSubset, subsetKtBinaryTree)
+        assertEquals(ktBinaryTreeTail, ktBinaryTreeTail)
+        assertEquals(ktSortedSetHead.last(), headKtBinaryTree.last())
+        assertEquals(ktSortedSetTail.last(), ktBinaryTreeTail.last())
+        assertEquals(subsetKtBinaryTree.size, ktSortedSetSubset.size)
+        assertTrue(
+            subsetKtBinaryTree.contains(ktSortedSetSubset.max())
+        )
+
+        val random = Random()
+        for (iteration in 1..100) {
+            val list = mutableListOf<Int>()
+            for (i in 1..20) {
+                list.add(random.nextInt(100))
+            }
+            val treeSet = sortedSetOf<Int>()
+            val binarySubSet = KtBinaryTree<Int>().subSet(list.min()!!, list.max()!! + 1)
+            assertFalse(binarySubSet.iterator().hasNext(), "Iterator of empty set should not have next element")
+            for (element in list) {
+                treeSet += element
+                binarySubSet += element
+            }
+            val treeIt = treeSet.iterator()
+            val binaryIt = binarySubSet.iterator()
+            println("Traversing $list")
+            while (treeIt.hasNext()) {
+                assertEquals(treeIt.next(), binaryIt.next(), "Incorrect iterator state while iterating $treeSet")
+            }
+            val iterator1 = binarySubSet.iterator()
+            val iterator2 = binarySubSet.iterator()
+            println("Consistency check for hasNext $list")
+            // hasNext call should not affect iterator position
+            while (iterator1.hasNext()) {
+                assertEquals(
+                    iterator2.next(), iterator1.next(),
+                    "Call of iterator.hasNext() changes its state while iterating $treeSet"
+                )
+            }
+        }
+    }
+
+
 }

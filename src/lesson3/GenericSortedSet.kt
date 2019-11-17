@@ -110,7 +110,12 @@ class GenericSortedSet<T : Comparable<T>>(
          */
         override fun next(): T {
             val result = next ?: throw NoSuchElementException()
-            next = if (delegate.hasNext()) delegate.next() else null
+            next = if (delegate.hasNext()) {
+                val nextElement = delegate.next()
+                if (checkInRange(nextElement))
+                    nextElement
+                else null
+            } else null
             return result
         }
 

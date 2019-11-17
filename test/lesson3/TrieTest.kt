@@ -1,7 +1,12 @@
 package lesson3
 
 import org.junit.jupiter.api.Tag
-import kotlin.test.*
+import java.security.SecureRandom
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class TrieTest {
 

@@ -131,19 +131,3 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
     }
 
 }
-
-fun main() {
-    val trie = Trie()
-    trie.add("abcdefg")
-    trie.add("zyx")
-    trie.add("zwv")
-    trie.add("zyt")
-    trie.add("abcde")
-    trie.add("q")
-
-
-    for (element in trie)
-        println("element in trie: $element")
-
-    println(trie.size)
-}
