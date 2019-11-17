@@ -60,4 +60,66 @@ class TrieTest {
 
         assertEquals(setOf("abcdefg", "zyx", "zwv", "zyt", "abcde"), trie)
     }
+
+
+    private inner class RandomIterator {
+        private val CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz"
+        private val CHAR_UPPER = CHAR_LOWER.toUpperCase()
+        private val NUMBER = "0123456789"
+        private val DATA_FOR_RANDOM_STRING =
+            CHAR_LOWER + CHAR_UPPER + NUMBER
+        private val random: SecureRandom = SecureRandom()
+
+        fun generateRandomString(length: Int): String {
+            require(length >= 1)
+            val sb = StringBuilder(length)
+            for (i in 0 until length) { // 0-62 (exclusive), random returns 0-61
+                val rndCharAt: Int = random.nextInt(DATA_FOR_RANDOM_STRING.length)
+                val rndChar = DATA_FOR_RANDOM_STRING[rndCharAt]
+                sb.append(rndChar)
+            }
+            return sb.toString()
+        }
+    }
+
+    @Test
+    @Tag("Hard")
+    fun doTrieIteratorTest() {
+        val randomIterator = RandomIterator()
+
+        val trie = Trie()
+        val mutableSet = mutableSetOf<String>()
+        for (i in 0..64) {
+            val randomLength = (4..8).random()
+            val generateString = randomIterator.generateRandomString(randomLength)
+            mutableSet.add(generateString)
+            trie.add(generateString)
+        }
+        val mutableSetIterator = mutableSet.iterator()
+        val trieIterator = trie.iterator()
+
+        while (trieIterator.hasNext()) {
+            val a = mutableSetIterator.next()
+            val b = toString(trieIterator.next())
+            println("mutableA: $a and triB: $b")
+
+        }
+        val iterator1 = trie.iterator()
+        val iterator2 = trie.iterator()
+
+        // hasNext call should not affect iterator position
+        while (iterator1.hasNext()) {
+            assertEquals(
+                iterator2.next(), iterator1.next(),
+                "Call of iterator.hasNext() changes its state while iterating $trie"
+            )
+        }
+    }
+
+    fun toString(str: String): String {
+        val sb = StringBuilder()
+        for (i in 0 until str.length - 1)
+            sb.append(str[i])
+        return sb.toString()
+    }
 }

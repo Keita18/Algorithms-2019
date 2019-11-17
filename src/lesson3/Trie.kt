@@ -9,6 +9,7 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
 
     private class Node {
         val children: MutableMap<Char, Node> = linkedMapOf()
+        var isWord = false
     }
 
     private var root = Node()
@@ -28,8 +29,10 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         return current
     }
 
-    override fun contains(element: String): Boolean =
-        findNode(element.withZero()) != null
+    override fun contains(element: String): Boolean {
+        val node = findNode(element.withZero())
+        return node != null && node.isWord
+    }
 
     override fun add(element: String): Boolean {
         var current = root
@@ -43,18 +46,21 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
                 val newChild = Node()
                 current.children[char] = newChild
                 current = newChild
+
             }
         }
-        if (modified) {
+        if (modified && !current.isWord) {
+            current.isWord = true
             size++
         }
-        return modified
+        return modified && current.isWord
     }
 
     override fun remove(element: String): Boolean {
         val current = findNode(element) ?: return false
         if (current.children.remove(0.toChar()) != null) {
             size--
+            current.isWord = false
             return true
         }
         return false
@@ -76,37 +82,27 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         private var next: String? = null
         private val deque: Deque<MutableIterator<MutableMap.MutableEntry<Char, Node>>> =
             ArrayDeque()
-        private val strB = StringBuilder()
-
-
-        init {
-            strB.append(prefix)
-            deque.push(node!!.children.entries.iterator())
-            findNext()
-        }
-
-
+        private val stringBuilder = StringBuilder()
         private fun findNext() {
             next = null
             var iterator = deque.peek()
-            var i = 0
-            var j = 0
             while (iterator != null) {
-                i++
                 while (iterator!!.hasNext()) {
-                    j++
-
-                    val itNext = iterator.next()
-                    val key = itNext.key
-                    strB.append(key)
-                    val node = itNext.value
+                    val e = iterator.next()
+                    val key = e.key
+                    stringBuilder.append(key)
+                    val node = e.value
                     iterator = node.children.entries.iterator()
                     deque.push(iterator)
+                    if (node.isWord) {
+                        next = stringBuilder.toString()
+                        return
+                    }
                 }
                 deque.pop()
-                val length = strB.length
-                if (length > 0) {
-                    strB.deleteCharAt(strB.length - 1)
+                val len = stringBuilder.length
+                if (len > 0) {
+                    stringBuilder.deleteCharAt(stringBuilder.length - 1)
                 }
                 iterator = deque.peek()
             }
@@ -122,6 +118,16 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
             return ret!!
         }
 
+        init {
+            stringBuilder.append(prefix)
+            deque.push(node!!.children.entries.iterator())
+            if (node.isWord) {
+                next = prefix
+            } else {
+                findNext()
+            }
+        }
+
         /**
          * Removes from the underlying collection the last element returned by this iterator.
          */
@@ -130,4 +136,16 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         }
     }
 
+}
+
+
+fun main() {
+    val trie = Trie()
+    trie.add("keita")
+    trie.add("alpha")
+    trie.add("sidiki")
+    trie.add("q")
+    trie.remove("sidiki")
+
+    println(trie.contains("sidiki"))
 }
