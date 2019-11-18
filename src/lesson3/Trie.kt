@@ -1,6 +1,7 @@
 package lesson3
 
 import java.util.*
+import kotlin.NoSuchElementException
 
 
 class Trie : AbstractMutableSet<String>(), MutableSet<String> {
@@ -9,7 +10,6 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
 
     private class Node {
         val children: MutableMap<Char, Node> = linkedMapOf()
-        var isWord = false
     }
 
     private var root = Node()
@@ -31,7 +31,7 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
 
     override fun contains(element: String): Boolean {
         val node = findNode(element.withZero())
-        return node != null && node.isWord
+        return node != null
     }
 
     override fun add(element: String): Boolean {
@@ -49,18 +49,16 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
 
             }
         }
-        if (modified && !current.isWord) {
-            current.isWord = true
+        if (modified) {
             size++
         }
-        return modified && current.isWord
+        return modified
     }
 
     override fun remove(element: String): Boolean {
         val current = findNode(element) ?: return false
         if (current.children.remove(0.toChar()) != null) {
             size--
-            current.isWord = false
             return true
         }
         return false
@@ -69,83 +67,51 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
     /**
      * Итератор для префиксного дерева
      * Сложная
-     * Time Complexity O(n * l) n - nodeNumber in the tree , l word length
-     * Memory Complexity (n) n - nodeNumber
      */
     override fun iterator(): MutableIterator<String> {
         return TrieIterator(root, "")
     }
 
-    /* Pre-order iterator */
     private inner class TrieIterator(node: Node?, prefix: String?) :
         MutableIterator<String> {
         private var next: String? = null
-        private val deque: Deque<MutableIterator<MutableMap.MutableEntry<Char, Node>>> =
-            ArrayDeque()
-        private val stringBuilder = StringBuilder()
-        private fun findNext() {
-            next = null
-            var iterator = deque.peek()
-            while (iterator != null) {
-                while (iterator!!.hasNext()) {
-                    val e = iterator.next()
-                    val key = e.key
-                    stringBuilder.append(key)
-                    val node = e.value
-                    iterator = node.children.entries.iterator()
-                    deque.push(iterator)
-                    if (node.isWord) {
-                        next = stringBuilder.toString()
-                        return
-                    }
-                }
-                deque.pop()
-                val len = stringBuilder.length
-                if (len > 0) {
-                    stringBuilder.deleteCharAt(stringBuilder.length - 1)
-                }
-                iterator = deque.peek()
-            }
-        }
+        val prefix = ArrayDeque(listOf(prefix))
+        val nodes = ArrayDeque(listOf(node))
 
+        /**
+         * Time Complexity O(1)
+         * Memory Complexity O(1)
+         */
         override fun hasNext(): Boolean {
-            return next != null
+            return nodes.isNotEmpty()
         }
 
+        /**
+         * Time Complexity O(n)
+         * Memory Complexity O(n)
+         */
         override fun next(): String {
-            val ret = next
-            findNext()
-            return ret!!
-        }
-
-        init {
-            stringBuilder.append(prefix)
-            deque.push(node!!.children.entries.iterator())
-            if (node.isWord) {
-                next = prefix
-            } else {
-                findNext()
+            while (nodes.isNotEmpty()) {
+                val iterator = nodes.removeLast().children
+                next = prefix.removeLast()
+                for ((char, node) in iterator)
+                    if (char != 0.toChar()) {
+                        prefix.add(next + char)
+                        nodes.add(node)
+                    } else return next!!
             }
+            throw NoSuchElementException()
         }
 
         /**
          * Removes from the underlying collection the last element returned by this iterator.
+         *
+         * Time Complexity O(l) - l length of string
+         * Memory Complexity O(1)
          */
         override fun remove() {
             this@Trie.remove(next)
         }
     }
 
-}
-
-
-fun main() {
-    val trie = Trie()
-    trie.add("keita")
-    trie.add("alpha")
-    trie.add("sidiki")
-    trie.add("q")
-    trie.remove("sidiki")
-
-    println(trie.contains("sidiki"))
 }

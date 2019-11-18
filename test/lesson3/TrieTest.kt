@@ -62,20 +62,20 @@ class TrieTest {
     }
 
 
-    private inner class RandomIterator {
-        private val CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz"
-        private val CHAR_UPPER = CHAR_LOWER.toUpperCase()
-        private val NUMBER = "0123456789"
-        private val DATA_FOR_RANDOM_STRING =
-            CHAR_LOWER + CHAR_UPPER + NUMBER
+    private class RandomIterator {
+        private val charLower = "abcdefghijklmnopqrstuvwxyz"
+        private val charUpper = charLower.toUpperCase()
+        private val number = "0123456789"
+        private val dataForRandomString =
+            charLower + charUpper + number
         private val random: SecureRandom = SecureRandom()
 
         fun generateRandomString(length: Int): String {
             require(length >= 1)
             val sb = StringBuilder(length)
             for (i in 0 until length) { // 0-62 (exclusive), random returns 0-61
-                val rndCharAt: Int = random.nextInt(DATA_FOR_RANDOM_STRING.length)
-                val rndChar = DATA_FOR_RANDOM_STRING[rndCharAt]
+                val rndCharAt: Int = random.nextInt(dataForRandomString.length)
+                val rndChar = dataForRandomString[rndCharAt]
                 sb.append(rndChar)
             }
             return sb.toString()
@@ -89,19 +89,18 @@ class TrieTest {
 
         val trie = Trie()
         val mutableSet = mutableSetOf<String>()
-        for (i in 0..64) {
+        for (i in 0..4) {
             val randomLength = (4..8).random()
             val generateString = randomIterator.generateRandomString(randomLength)
             mutableSet.add(generateString)
             trie.add(generateString)
         }
-        val mutableSetIterator = mutableSet.iterator()
         val trieIterator = trie.iterator()
 
         while (trieIterator.hasNext()) {
-            val a = mutableSetIterator.next()
-            val b = toString(trieIterator.next())
-            println("mutableA: $a and triB: $b")
+            while (trieIterator.hasNext()) {
+                assertTrue(mutableSet.contains(trieIterator.next()))
+            }
 
         }
         val iterator1 = trie.iterator()
@@ -116,10 +115,57 @@ class TrieTest {
         }
     }
 
-    fun toString(str: String): String {
-        val sb = StringBuilder()
-        for (i in 0 until str.length - 1)
-            sb.append(str[i])
-        return sb.toString()
+    @Test
+    @Tag("Hard")
+    fun doIteratorRemoveTest() {
+        testIteratorRemove { Trie() }
+    }
+
+
+    private fun testIteratorRemove(create: () -> Trie) {
+        val random = Random()
+        val randomIterator = RandomIterator()
+
+        for (iteration in 1..100) {
+            val list = mutableListOf<String>()
+            for (i in 1..20) {
+                val randomLength = (4..8).random()
+                val generateString = randomIterator.generateRandomString(randomLength)
+                list.add(generateString)
+            }
+            val treeSet = TreeSet<String>()
+            val binarySet = create()
+            for (element in list) {
+                treeSet += element
+                binarySet += element
+            }
+            val toRemove = list[random.nextInt(list.size)]
+            treeSet.remove(toRemove)
+            println("Removing $toRemove from $list")
+            val iterator = binarySet.iterator()
+            var counter = binarySet.size
+            while (iterator.hasNext()) {
+                val element = iterator.next()
+                counter--
+                print("$element ")
+                if (element == toRemove) {
+                    iterator.remove()
+                }
+            }
+            assertEquals(
+                0, counter,
+                "Iterator.remove() of $toRemove from $list changed iterator position: " +
+                        "we've traversed a total of ${binarySet.size - counter} elements instead of ${binarySet.size}"
+            )
+            println()
+            assertEquals(treeSet.size, binarySet.size, "Size is incorrect after removal of $toRemove from $list")
+            for (element in list) {
+                val inn = element != toRemove
+                assertEquals(
+                    inn, element in binarySet,
+                    "$element should be ${if (inn) "in" else "not in"} tree"
+                )
+            }
+        }
     }
 }
